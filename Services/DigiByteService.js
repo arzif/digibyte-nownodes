@@ -2,19 +2,20 @@
 const DigiByte = require('digibyte');
 const { default: axios } = require('axios');
 const { getRequestHeaders } = require('../helpers/get-request-headers');
+const { getApiKey } = require('../helpers/get-api-key');
 
 class DigiByteService {
   UTXO_ENDPOINT = 'https://dgb.nownodes.io/api/v2/utxo';
 
   ADDRESS_ENDPOINT = 'https://dgb.nownodes.io/api/v2/address';
 
-  SEND_TRANSACTION_ENDPOINT = 'https://dgb.nownodes.io/api/v2/sendtx';
+  JSON_RPC_ENDPOINT = 'https://dgb.nownodes.io';
 
   TRANSACTION_ENDPOINT = 'https://dgb.nownodes.io/api/v2/tx';
 
-  FEE_TO_SEND_DGB = 0.00005 * this.SAT_IN_DGB;
-
   SAT_IN_DGB = 100000000;
+
+  FEE_TO_SEND_DGB = 0.0000553 * this.SAT_IN_DGB;
 
   MINER_FEE = 100000;
 
@@ -91,13 +92,24 @@ class DigiByteService {
 
   async sendTx(to, from, privateKey, amount) {
     const transaction = await this.createTransaction(privateKey, from, to, amount);
-    const serialized = transaction.serialize(true);
-    const sendTransactionResponse = await axios.get(
-      `${this.SEND_TRANSACTION_ENDPOINT}/${serialized}`,
-      getRequestHeaders(),
-    );
-    const { data: sendTransactionResponseData } = await sendTransactionResponse;
-    return sendTransactionResponseData;
+    const serializedTransaction = transaction.serialize(true);
+    const transactionResult = await this.sendRawTx(serializedTransaction);
+    return transactionResult;
+  }
+
+  async sendRawTx(serializedTransaction) {
+    const payload = {
+      API_key: getApiKey(),
+      jsonrpc: '2.0',
+      id: 'test',
+      method: 'sendrawtransaction',
+      params: [
+        serializedTransaction,
+      ],
+    };
+    const response = await axios.post(this.JSON_RPC_ENDPOINT, payload);
+    const resultData = await response.data;
+    return resultData;
   }
 
   async getIncommingTransactions(address, itemsCount = 50) {

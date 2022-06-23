@@ -1,9 +1,7 @@
-require('dotenv').config();
-
-const { NOWNODES_API_KEY } = process.env;
+const { getApiKey } = require('./get-api-key');
 
 function getRequestHeaders() {
-  const apiKey = NOWNODES_API_KEY;
+  const apiKey = getApiKey();
   return {
     headers: {
       'api-key': apiKey,
