@@ -31,7 +31,7 @@ router.post('/transactions', async (req, res) => {
     const {
       to, from, privateKey, amount,
     } = req.body;
-    const result = await digiByteService.sendTx(to, from, privateKey, amount);
+    const result = await digiByteService.sendTransaction(to, from, privateKey, amount);
     res.json({
       ...result,
     });

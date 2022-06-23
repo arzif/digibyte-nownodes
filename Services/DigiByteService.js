@@ -90,7 +90,7 @@ class DigiByteService {
     return balanceInSatoshi ? (balanceInSatoshi / this.SAT_IN_DGB) : 0;
   }
 
-  async sendTx(to, from, privateKey, amount) {
+  async sendTransaction(to, from, privateKey, amount) {
     const transaction = await this.createTransaction(privateKey, from, to, amount);
     const serializedTransaction = transaction.serialize(true);
     const transactionResult = await this.sendRawTx(serializedTransaction);
