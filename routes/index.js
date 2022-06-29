@@ -29,11 +29,9 @@ router.get('/wallet/balance/:address', async (req, res) => {
 router.post('/transactions', async (req, res) => {
   try {
     const {
-      to, from, privateKey, publicKey, amount,
+      to, from, privateKey, amount,
     } = req.body;
-    const result = await digiByteService.sendTransaction({
-      to, from, privateKey, publicKey, amount,
-    });
+    const result = await digiByteService.sendTransaction(to, from, privateKey, amount);
     res.json({
       ...result,
     });
