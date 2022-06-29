@@ -57,7 +57,7 @@ class DigiByteService {
       txId: utxo.txid,
       vout: +utxo.vout,
       address: origin,
-      scriptPubKey: utxo.scriptPubKey,
+      scriptPubKey: DigiByte.Script.fromAddress(origin),
       amount: parseFloat(utxo.value) / this.SAT_IN_DGB,
     }));
 
