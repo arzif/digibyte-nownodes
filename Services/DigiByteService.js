@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 const DigiByte = require('digibyte');
 const { default: axios } = require('axios');
+const Script = require('digibyte-js/lib/script/script');
 const { getRequestHeaders } = require('../helpers/get-request-headers');
 const { getApiKey } = require('../helpers/get-api-key');
 
@@ -40,7 +41,9 @@ class DigiByteService {
     return utxos;
   }
 
-  async createTransaction(privateKey, origin, destination, manualAmount = 0) {
+  async createTransaction({
+    privateKey, origin, publicKey, destination, manualAmount = 0,
+  }) {
     const pk = new DigiByte.PrivateKey(privateKey);
     let utxos = await this.getUtxos(origin);
     let transactionAmount = 0;
@@ -57,7 +60,7 @@ class DigiByteService {
       txId: utxo.txid,
       vout: +utxo.vout,
       address: origin,
-      scriptPubKey: utxo.scriptPubKey,
+      scriptPubKey: Script.fromAddress(publicKey),
       amount: parseFloat(utxo.value) / this.SAT_IN_DGB,
     }));
 
@@ -90,8 +93,12 @@ class DigiByteService {
     return balanceInSatoshi ? (balanceInSatoshi / this.SAT_IN_DGB) : 0;
   }
 
-  async sendTransaction(to, from, privateKey, amount) {
-    const transaction = await this.createTransaction(privateKey, from, to, amount);
+  async sendTransaction({
+    to, from, privateKey, publicKey, amount,
+  }) {
+    const transaction = await this.createTransaction({
+      privateKey, publicKey, from, to, amount,
+    });
     const serializedTransaction = transaction.serialize(true);
     const transactionResult = await this.sendRawTx(serializedTransaction);
     return transactionResult;
